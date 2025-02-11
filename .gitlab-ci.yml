@@ -1,8 +1,4 @@
-image: ubuntu:latest
-
-before_script:
-  - apt-get update
-  - apt-get install -y clang-format git make
+image: registry.csc.sibsutis.ru/trpo/ci
 
 stages:
   - check-format
