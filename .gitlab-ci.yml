@@ -1,4 +1,4 @@
-image: alpine:latest
+image: clang:latest
 
 stages:
   - check-format
