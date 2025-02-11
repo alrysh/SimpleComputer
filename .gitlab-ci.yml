@@ -10,7 +10,7 @@ stages:
 check-format:
   stage: check-format
   script:
-    - find . -type f -name *.[ch] | xargs clang-format -- style GNU -i --verbose
+    - find . -type f -name "*.c" -o -type f -name "*.h" | xargs clang-format --style=GNU -i --verbose
     - git diff --exit-code
  
 build:
