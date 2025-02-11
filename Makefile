@@ -1,4 +1,4 @@
-TARGET = test
+TARGET = console/test
 
 SOURCE = console/test.c
 
