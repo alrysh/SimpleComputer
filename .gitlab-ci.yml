@@ -1,4 +1,4 @@
-image: registry.csc.sibsutis.ru/ci/git-clangformat:latest
+image: alpine:latest
 
 stages:
   - check-format
