@@ -1,4 +1,7 @@
-image: clang:latest
+image: alpine:latest
+
+before_script:
+  - apk add --no-cache clang
 
 stages:
   - check-format
