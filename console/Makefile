@@ -1,36 +1,24 @@
 CC = gcc
-CFLAGS = -Wall -I../include
-AR = ar
-ARFLAGS = rcs
+CFLAGS = -Wall -I../mySimpleComputer/../include -I../myTerm
+LDFLAGS = -L../mySimpleComputer -lmySimpleComputer -L../myTerm -lmyTerm
 
-LIB_DIR = ../mySimpleComputer
-LIB_NAME = $(LIB_DIR)/libmySimpleComputer.a
-LIB_SRC = $(LIB_DIR)/command.c $(LIB_DIR)/memory.c $(LIB_DIR)/print.c $(LIB_DIR)/register.c
-LIB_OBJ = $(LIB_SRC:.c=.o)
+TARGET = console
+SRC = console.c
 
-PRG_SRC = pr01.c
-PRG_OBJ = $(PRG_SRC:.c=.o)
-PRG_NAME = pr01
+all: $(TARGET)
 
-all: $(LIB_NAME) $(PRG_NAME)
+$(TARGET): $(SRC)
+	# Сборка программы с использованием двух библиотек
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
-#компиляция объектных файлов библиотеки
-$(LIB_DIR)/%.o: $(LIB_DIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+# Гарантия, что библиотеки собраны перед компиляцией console
+.PHONY: all clean deps
 
-#сборка статической библиотеки
-$(LIB_NAME): $(LIB_OBJ)
-	$(AR) $(ARFLAGS) $@ $^
-
-#компиляция pr01
-$(PRG_OBJ): $(PRG_SRC)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-#линковка pr01 с библиотекой
-$(PRG_NAME): $(PRG_OBJ) $(LIB_NAME)
-	$(CC) $(CFLAGS) -o $@ $(PRG_OBJ) $(LIB_NAME)
+deps:
+	$(MAKE) -C ../mySimpleComputer
+	$(MAKE) -C ../myTerm
 
 clean:
-	rm -f $(LIB_DIR)/*.o $(LIB_NAME) $(PRG_OBJ) $(PRG_NAME)
-
-.PHONY: all clean
+	rm -f $(TARGET)
+	$(MAKE) -C ../mySimpleComputer clean
+	$(MAKE) -C ../myTerm clean

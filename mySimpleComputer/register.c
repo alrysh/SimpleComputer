@@ -13,21 +13,16 @@ int accumulator = 0;
 int instructCounter = 0;
 int flags = 0;
 
-int
-sc_regInit (void)
-{
+int sc_regInit(void) {
   flags = 0;
   return 0;
 }
 
-int
-sc_regSet (int reg, int value)
-{
-  if (reg != FLAG_OVERFLOW && reg != FLAG_ZERO_DIV && reg != FLAG_MEMORY_OUT
-      && reg != FLAG_CLOCK_IGNORE && reg != FLAG_INVALID_CMD)
-    {
-      return -1;
-    }
+int sc_regSet(int reg, int value) {
+  if (reg != FLAG_OVERFLOW && reg != FLAG_ZERO_DIV && reg != FLAG_MEMORY_OUT &&
+      reg != FLAG_CLOCK_IGNORE && reg != FLAG_INVALID_CMD) {
+    return -1;
+  }
   if (value)
     flags |= reg;
   else
@@ -39,14 +34,11 @@ sc_regSet (int reg, int value)
 // int sc_regGet (int register, int * value) – возвра-
 // щает значение указанного флага.
 
-int
-sc_regGet (int reg, int *value)
-{
-  if (reg != FLAG_OVERFLOW || reg != FLAG_ZERO_DIV || reg != FLAG_MEMORY_OUT
-      || reg != FLAG_CLOCK_IGNORE || reg != FLAG_INVALID_CMD || value == NULL)
-    {
-      return -1;
-    }
+int sc_regGet(int reg, int *value) {
+  if (reg != FLAG_OVERFLOW || reg != FLAG_ZERO_DIV || reg != FLAG_MEMORY_OUT ||
+      reg != FLAG_CLOCK_IGNORE || reg != FLAG_INVALID_CMD || value == NULL) {
+    return -1;
+  }
 
   *value = (flags & reg) ? 1 : 0;
 
@@ -56,9 +48,7 @@ sc_regGet (int reg, int *value)
 // int sc_accumulatorInit (void) – инициализирует аккуму-
 // лятор значением по умолчанию;
 
-int
-sc_accumulatorInit (void)
-{
+int sc_accumulatorInit(void) {
   accumulator = 0;
   return 0;
 }
@@ -66,17 +56,12 @@ sc_accumulatorInit (void)
 // int sc_accumulatorSet (int value) – устанавливает зна-
 // чение аккумулятора.
 
-int
-sc_accumulatorSet (int value)
-{
-  if (value >= VAL_MIN && value <= VAL_MAX)
-    {
-      accumulator = value;
-    }
-  else
-    {
-      return -1;
-    }
+int sc_accumulatorSet(int value) {
+  if (value >= VAL_MIN && value <= VAL_MAX) {
+    accumulator = value;
+  } else {
+    return -1;
+  }
   return 0;
 }
 
@@ -84,51 +69,34 @@ sc_accumulatorSet (int value)
 // чение аккумулятора. Если передан неверный указатель на значение,
 // то функция завершается со статусом -1.
 
-int
-sc_accumulatorGet (int *value)
-{
-  if (value != NULL)
-    {
-      *value = accumulator;
-      return 0;
-    }
-  else
-    {
-      return -1;
-    }
+int sc_accumulatorGet(int *value) {
+  if (value != NULL) {
+    *value = accumulator;
+    return 0;
+  } else {
+    return -1;
+  }
 }
 
-int
-sc_icounterInit (void)
-{
+int sc_icounterInit(void) {
   instructCounter = 0;
   return 0;
 }
 
-int
-sc_icounterSet (int value)
-{
-  if (value >= VAL_MIN && value <= VAL_MAX)
-    {
-      instructCounter = value;
-      return 0;
-    }
-  else
-    {
-      return -1;
-    }
+int sc_icounterSet(int value) {
+  if (value >= VAL_MIN && value <= VAL_MAX) {
+    instructCounter = value;
+    return 0;
+  } else {
+    return -1;
+  }
 }
 
-int
-sc_icounterGet (int *value)
-{
-  if (value != NULL)
-    {
-      *value = instructCounter;
-      return 0;
-    }
-  else
-    {
-      return -1;
-    }
+int sc_icounterGet(int *value) {
+  if (value != NULL) {
+    *value = instructCounter;
+    return 0;
+  } else {
+    return -1;
+  }
 }
