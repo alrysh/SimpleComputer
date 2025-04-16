@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "myTerm.h"
+#include "myBigChars.h"
 
 #define MEMORY_SIZE 128
 
@@ -12,6 +13,8 @@
 //и положит и отриц: 2^15 = 32767 и 1 бит для знака
 //только положит: 65535
 //не менять, используется для аккумулятора и счетчика команд
+
+extern int nowRedact;
 
 extern int memory[MEMORY_SIZE];
 extern int accumulator;
@@ -58,5 +61,8 @@ void printFlags(void);
 void printCounters(void);
 void printDecodedCommand(int value);
 void printTerm(int address, int input);
+
+void printCommand();
+void printBigCell(void);
 
 #endif

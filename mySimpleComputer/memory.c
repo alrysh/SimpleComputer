@@ -27,7 +27,7 @@ int sc_memoryGet(int address, int *value) {
     *value = memory[address];
     return 0;
   } else {
-    printf("Ошибка: Неверный адрес чтения (%d)!\n", address);
+    // printf("Ошибка: Неверный адрес чтения (%d)!\n", address);
     return -1;
   }
 }
