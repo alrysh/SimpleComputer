@@ -32,7 +32,7 @@ int main() {
     }
     printf("Размер терминала совпадает\n");
 
-    int font;
+    // int font;
 
     // if (argc > 2) {
     //     printf("Много аргументов");
@@ -52,8 +52,6 @@ int main() {
     //     printf("Не удается прочесть файл шрифта");
     //     return -1;
     // }
-
-    nowRedact = 77;
 
     mt_clrscr();
     sc_memoryInit();
@@ -112,7 +110,8 @@ int main() {
         printTerm(10+i, 1);
     }
 
-    mt_gotoXY(12, 65);
+    nowRedact = 0;
+    mt_gotoXY(10, 65);
     printBigCell();
     // mt_setdefaultcolor();
 
@@ -122,26 +121,15 @@ int main() {
     // init_big_A(big_A);   
     
     // bc_printbigchar(big_A, 9, 65, WHITE, BLACK);
-    mt_gotoXY(10, 65);
-    mt_setbgcolor(BLACK);
-    print_big_string("+0123AB", 9, 65);
+    // mt_gotoXY(10, 65);
+    // mt_setbgcolor(BLACK);
+    // char *big_char = "+0123ABC"; 
+    // bc_bigstring(big_char, 9, 65);
+
+    // bc_printbigchar0(17, 10, 65);
 
     mt_gotoXY(90, 1);
     // mt_gotoXY(100, 1);
-
-    // mt_setcolor(BLUE, WHITE);
-    // write(1, "Colored Text", 12);
-    // mt_setdefaultcolor();
-    // printf("\n");
-
-    // mt_setfgcolor(PURPLE);
-    // printf("Colored text\n");
-    // mt_setbgcolor(RED);
-
-    // write(1, "Colored Text", 12); //!
-    // mt_setdefaultcolor();
-    // printf("\n");
-    // printf("Colored text\n");
 
     return 0;
 }

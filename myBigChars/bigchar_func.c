@@ -9,33 +9,30 @@
 
 int bigchar[18][2] = {0};
 int bigchars[18][2] = {
-    //цифры 0-9
-    {0x7E818181, 0x8181817E},  // 0
-    {0x18381818, 0x1818187E},  // 1
-    {0x7E81011E, 0x6080817E},  // 2
-    {0x7E81017E, 0x0181817E},  // 3
-    {0x8181817F, 0x01010101},  // 4
-    {0xFF807E01, 0x0181817E},  // 5
-    {0x7E807E81, 0x8181817E},  // 6
-    {0xFF010204, 0x08102040},  // 7
-    {0x7E817E81, 0x8181817E},  // 8
-    {0x7E81817F, 0x0101017E},  // 9
+    {0x7E818181, 0x8181817E},  //0
+    {0x18381818, 0x1818187E},  //1
+    {0x7E81011E, 0x608080FE},  //2
+    {0x7E81017E, 0x0181817E},  //3
+    {0x8181817F, 0x01010101},  //4
+    {0xFF807E01, 0x0181817E},  //5
+    {0x7E807E81, 0x8181817E},  //6
+    {0xFF010204, 0x08102040},  //7
+    {0x7E817E81, 0x8181817E},  //8
+    {0x7E81817F, 0x0101017E},  //9
     
-    //буквы A-H
-    {0x183C6642, 0x42FF4242},  // A
-    {0xFC42427C, 0x424242FC},  // B
-    {0x3C428080, 0x8080423C},  // C
-    {0xF8444242, 0x424244F8},  // D
-    {0xFE8080F8, 0x808080FE},  // E
-    {0xFE8080F8, 0x80808080},  // F
-    {0x3C42809E, 0x8242423E},  // G
+    {0x183C6642, 0x42FF4242},  //A
+    {0xFC42427C, 0x424242FC},  //B
+    {0x3C428080, 0x8080423C},  //C
+    {0xF8444242, 0x424244F8},  //D
+    {0xFE8080F8, 0x808080FE},  //E
+    {0xFE8080F8, 0x80808080},  //F
+    {0xFF, 0x0},  //-
     {0x1818FF, 0x18180000}   // +
 };
 
 
 int bc_strlen(const char *str) {
     if (str == NULL) {
-        // fprintf(stderr, "Ошибка: NULL указатель\n");
         return -1;
     }
 
@@ -50,7 +47,6 @@ int bc_strlen(const char *str) {
         } else if ((byte & 0xE0) == 0xC0) {
             // 2-байтовый символ (110xxxxx)
             if ((str[1] & 0xC0) != 0x80) {
-                // fprintf(stderr, "Ошибка: Некорректный UTF-8 (2-байтовый символ)\n");
                 return -1;
             }
             count++;
@@ -58,7 +54,6 @@ int bc_strlen(const char *str) {
         } else if ((byte & 0xF0) == 0xE0) {
             // 3-байтовый символ (1110xxxx)
             if ((str[1] & 0xC0) != 0x80 || (str[2] & 0xC0) != 0x80) {
-                // fprintf(stderr, "Ошибка: Некорректный UTF-8 (3-байтовый символ)\n");
                 return -1;
             }
             count++;
@@ -67,13 +62,11 @@ int bc_strlen(const char *str) {
             // 4-байтовый символ (11110xxx)
             if ((str[1] & 0xC0) != 0x80 || (str[2] & 0xC0) != 0x80 || 
                 (str[3] & 0xC0) != 0x80) {
-                // fprintf(stderr, "Ошибка: Некорректный UTF-8 (4-байтовый символ)\n");
                 return -1;
             }
             count++;
             str += 4;
         } else {
-            //fprintf(stderr, "Ошибка: Некорректный старший байт UTF-8\n");
             return -1;
         }
     }
@@ -209,26 +202,26 @@ int bc_getbigcharpos(int *big, int x, int y, int *value) {
     return 0;
 }
 
-int bc_printbigchar(int big[2], int x, int y, enum colors fg, enum colors bg)
-{
-    write(1, "\033(0", 3);
+// int bc_printbigchar(int big[2], int x, int y, enum colors fg, enum colors bg)
+// {
+//     write(1, "\033(0", 3);
 
-    mt_setfgcolor(fg);
-    mt_setbgcolor(bg);
+//     mt_setfgcolor(fg);
+//     mt_setbgcolor(bg);
 
-    for (int y1 = 0; y1 != 8; y1++) {
-        mt_gotoXY(x, y + y1);
-        for (int x1 = 0; x1 != 8; x1++) {
-            int value;
-            bc_getbigcharpos(big, x1, y1, &value);
-            printf("%c", value ? 'aa' : ' ');
-        }
-        fflush(stdout);
-    }
-    write(1, "\033(B", 3);
-    mt_setdefaultcolor();
-    return 0;
-}    
+//     for (int y1 = 0; y1 != 8; y1++) {
+//         mt_gotoXY(x, y + y1);
+//         for (int x1 = 0; x1 != 8; x1++) {
+//             int value;
+//             bc_getbigcharpos(big, x1, y1, &value);
+//             printf("%c", value ? 'a' : ' ');
+//         }
+//         fflush(stdout);
+//     }
+//     write(1, "\033(B", 3);
+//     mt_setdefaultcolor();
+//     return 0;
+// }    
 
 int bc_bigcharwrite(int fd, int* big, int count)
 {
@@ -254,7 +247,7 @@ int bc_bigcharread(int fd, int* big, int need_count, int* count)
     return -1;
 }
 
-void print_char_line(int part, int line) {
+void bc_print_char_line(int part) {
     write(1, "\033(0", 3);
     for (int j = 0; j < 8; j++) {
         printf("%c", (part & (1 << (7 - j))) ? 'a' : ' ');
@@ -263,33 +256,21 @@ void print_char_line(int part, int line) {
     write(1, "\033(B", 3);
 }
 
-void print_big_string(const char *text, int x, int y) {
-    int len = strlen(text);
-    int current_x = x;
-    int current_y = y;
+void bc_printbigchar(int index, int x, int y, enum colors fg, enum colors bg) {
+    if (index < 0 || index >= 18) {
+        return;
+    }
+
+    mt_setfgcolor(fg);
+    mt_setbgcolor(bg);
 
     for (int line = 0; line < 8; line++) {
-        current_y = y;  // Сбрасываем позицию X для каждой новой строки символа
-        
-        for (int i = 0; i < len; i++) {
-            char c = text[i];
-            int index = -1;
-            
-            if (c >= '0' && c <= '9') index = c - '0';
-            else if (c >= 'A' && c <= 'G') index = 10 + (c - 'A');
-            else if (c >= 'a' && c <= 'g') index = 9 + (c - 'a');
-            else if (c == '+') index = 17;  
+        mt_gotoXY(x + line, y);
 
-            mt_gotoXY(current_x + line, current_y);
-            
-            if (index >= 0 && index < 18) {
-                int part = (line < 4) ? bigchars[index][0] : bigchars[index][1];
-                print_char_line((part >> ((3 - (line % 4)) * 8)) & 0xFF, line);
-            } else {
-                printf("        ");
-            }
-            
-            current_y += 9;  // 8 символов + 1 пробел
-        }
+        int part = (line < 4) ? bigchars[index][0] : bigchars[index][1];
+        int byte = (part >> ((3 - (line % 4)) * 8)) & 0xFF;
+        bc_print_char_line(byte);
     }
+
+    mt_setdefaultcolor();
 }

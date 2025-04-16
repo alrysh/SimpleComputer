@@ -6,11 +6,11 @@ LDFLAGS = -L../mySimpleComputer -lmySimpleComputer \
 
 TARGET = console
 SRC = console.c
-# FONTGEN = font
-# FONT_SRC = font.c
-# FONT_OUT = font.bin
+FONTGEN = font
+FONT_SRC = font.c
+FONT_OUT = font.bin
 
-# all: deps $(FONT_OUT) $(TARGET)
+all: deps $(FONT_OUT) $(TARGET)
 
 $(TARGET): $(SRC)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
