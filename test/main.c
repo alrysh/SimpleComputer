@@ -27,7 +27,6 @@ int bigchars[18][2] = {
     {0x00081800, 0x00183C18}   // +
 };
 
-// Функция для вывода одной строки символа
 void print_char_line(int part, int line) {
     write(1, "\033(0", 3);
     for (int j = 0; j < 8; j++) {
