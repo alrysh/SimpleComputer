@@ -1,0 +1,53 @@
+1. clear_screen
+    clear=\E[H\E[2J
+    \E[H\E[2J
+
+2. cursor_address
+    cup=\E[%i%p1%d;%p2%dH
+    \E[%i%p1%d;%p2%dH
+
+(where %p1 — row, %p2 — column)
+
+3. set_a_foreground (31-37, 91-96 colour)
+    setaf=\E[d%e%p%?%p1%{8}%<%t3%p1%1%{16}%<%t9%p1%{8}%-%d%e38;5;%p1%d%;m
+    \E[%?%p1%{8}%<%t3%p1%d%e%p1%{16}%<%t9%p1%{8}%-%d%e38;5;%p1%d%;m
+
+(where %p1 — num of colour)
+
+4. set_a_background (41-47 colour)
+    setab=\E[%?%p1%{8}%<%t4%p1%d%e%p1%{16}%<%t10%p1%{8}%-%d%e48;5;%p1%d%;m
+    \E[%?%p1%{8}%<%t4%p1%d%e%p1%{16}%<%t10%p1%{8}%-%d%e48;5;%p1%d%;m
+
+5. cursor_invisible
+    civis=\E[?25l
+    \E[?25l
+
+6. cursor_visible
+    cnorm=\E[?12l\E[?25h
+    \E[?12l\E[?25h
+
+7. delete_line
+    el=\E[K
+    \E[K
+
+
+\E[ - Начало escape-последовательности в ANSI-терминалах
+Последовательности ANSI для задания свойств текста:
+
+ echo -e "\E[1;32;2;107mЗелёный текст на белом фоне\E[0m"
+ echo -e "\E[31mКрасный текст\E[0m"
+
+echo -e "\E[H\E[2J"
+echo -e "\E[5;10H\E[31;40mSofia Shkatulova\E[0m"
+echo -e "\E[6;8H\E[32;47mIV-322\E[0m"
+echo -e "\E[10;1H\E[0m"
+
+ echo -e "\e[2;36;1;45mГолубой текст на фиолетовом фоне\e[0m"
+
+Структура winsize уже определена в #include <sys/ioctl.h>:
+    struct winsize {
+        unsigned short ws_row;
+        unsigned short ws_col;
+        unsigned short ws_xpixel;
+        unsigned short ws_ypixel;
+    };

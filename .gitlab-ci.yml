@@ -1,0 +1,15 @@
+image: registry.csc.sibsutis.ru/trpo/ci
+
+stages:
+  - check-format
+  - build
+
+check-format:
+  stage: check-format
+  script:
+    - find . -type f -name "*.c" -o -type f -name "*.h" | xargs clang-format --verbose
+ 
+build:
+  stage: build
+  script:
+    - make
