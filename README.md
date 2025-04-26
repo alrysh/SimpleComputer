@@ -1,1 +1,1 @@
-Шкатулова София Михайловна ИВ-322
+SimpleComputer — a program simulating a simplified computer
