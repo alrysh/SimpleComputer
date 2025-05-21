@@ -10,15 +10,16 @@ int sc_memoryInit() {
   return 0;
 }
 
+//FIX ME: перенести декодирование в sc_memorySet() ?
 int sc_memorySet(int address, int value) {
   if (address >= 0 && address < MEMORY_SIZE && value >= VAL_MIN &&
       value <= VAL_MAX) {
     memory[address] = value;
   } else {
-    // printf("Ошибка: Выход за границы memory (адрес %d, значение %d)\n",
-    // address, value);
     return -1;
   }
+  printAllMemory();
+  
   return 0;
 }
 
@@ -36,8 +37,8 @@ int sc_memorySave(const char *filename) {
   if (filename == NULL) {
     return -1;
   }
-
-  FILE *file = fopen(filename, "wb"); //имя файла
+  
+  FILE *file = fopen(filename, "wb");
   if (file == NULL) {
     return -1;
   }
@@ -51,6 +52,7 @@ int sc_memorySave(const char *filename) {
 
   return 0;
 }
+
 
 int sc_memoryLoad(char *filename) {
   if (filename == NULL) {

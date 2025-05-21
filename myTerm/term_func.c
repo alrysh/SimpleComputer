@@ -82,12 +82,6 @@ int mt_setbgcolor(enum colors color) {
     }
 }
 
-// ➢ int mt_setdefaultcolor (void) – устанавливает цвета
-// символов и фона в значения по умолчанию;
-// ➢ int mt_setcursorvisible (int value) – скрывает или
-// показывает курсор;
-// ➢ int mt_delline (void) – очищает текущую строку
-
 int mt_setdefaultcolor(void) {
     if (write(1, "\033[0m", 4) == -1) {
         return -1;

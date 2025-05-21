@@ -95,16 +95,6 @@ int bc_printA (char * str) {
     return 0;
 }
 
-// int bc_box(int x1, int y1, int x2, int y2, enum
-//     colors box_fg, enum colors box_bg, char *header, 
-//     enum colors header_fg, enum colors header_bg) -
-//     выводит на экран псевдографическую рамку, в которой левый 
-//     верхний угол располагается в строке x1 и столбце y1, а её ширина 
-//     и высота равна y2 столбцов и x2 строк. Цвет псевдографических 
-//     символов и их фон указан в параметрах box_fg, box_bg. Если пе-
-//     редан корректный указатель на header и полученная строка деко-
-//     дируется
-
 int bc_box(int x1, int y1, int x2, int y2,
     enum colors box_fg, enum colors box_bg, char *header, 
     enum colors header_fg, enum colors header_bg) {
@@ -126,7 +116,8 @@ int bc_box(int x1, int y1, int x2, int y2,
     bc_printA("k");
     fflush(stdout);
 
-    mt_gotoXY(x1, y1 + (y2 - strlen(header))/2); 
+    // mt_gotoXY(x1, (y2 - y1)/2 - strlen(header)/2);
+    mt_gotoXY(x1, y1+10);
     //mt_gotoXY(x1, y1 + (y2 - y1) / 2);
 
     
@@ -166,11 +157,6 @@ int bc_box(int x1, int y1, int x2, int y2,
 
     return 0;
 }
-
-// int bc_setbigcharpos (int *big, int x, int y, 
-//     int value) – манипулирует элементом шрифта и устанавливает 
-//     в нем значение знакоместа "большого символа" в строке x и столб-
-//     це y в значение value;
 
 int bc_setbigcharpos(int *big, int x, int y, int value) {
     if (x < 0 || x > 7 || y < 0 || y > 7 || (value != 0 && value != 1)) {

@@ -1,7 +1,9 @@
-#include "mySimpleComputer.h"'
+#include "mySimpleComputer.h"
 #include "myBigChars.h"
 #include "myTerm.h"
+#include "myReadkey.h"
 #include <stdio.h>
+#include <string.h>
 
 char INOUT[5][15] = {"", "", "", "", ""};
 int nowRedact = 0;
@@ -10,17 +12,19 @@ void printCell(int address, enum colors fg, enum colors bg) {
   mt_setfgcolor(fg);
   mt_setbgcolor(bg);
 
+  //FIX ME: перенести декодирование в sc_memorySet() ?
   int value;
   if (sc_memoryGet(address, &value) == 0) {
     int sign = 0;
     int command = 0;
     int opperand = 0;
-    if (sign == 0) {
+
+    sc_commandDecode(value, &sign, &command, &opperand);
+        if (sign == 0) {
         putchar('+');
-    } else {
+    } else if (sign == 1) {
         putchar('-');
     }
-    sc_commandDecode(value, &sign, &command, &opperand);
     printf("%0*X%0*X ", 2, command, 2, opperand);
     fflush(stdout);
     mt_setdefaultcolor();
@@ -38,25 +42,43 @@ void printFlags(void) {
          fflush(stdout);
 }
 
-void printDecodedCommand(int value) {
-  mt_gotoXY(5, 105);
-
-  printf("Hex: %X Bin: ", value);
+void printCellFormat(void) {
+  int value;
+  sc_memoryGet(nowRedact, &value);
+  mt_gotoXY(18, 3);
+  mt_setfgcolor(RED);
+  printf("dec: %05d oct: %05o hex: %04x bin: ", value, value, value);
   for (int i = 15; i >= 0; i--) {
-    printf("%d", (value >> i) & 1);
+      printf("%d", (value >> i) & 1);
+      if (i % 4 == 0 && i != 0) 
+          printf(" ");
   }
   printf("\n");
+  // fflush(stdout);
 }
 
 void printAccumulator(void) {
+
+  // FIX ME: negative numbers, +, -, format %04X ?
+  int sign = 0, command = 0, operand = 0;
+  if (sc_commandDecode(accumulator, &sign, &command, &operand) == 0) {
+    mt_gotoXY(2, 65);
+    printf("sc: %c%02X%02X\t", (sign == 0 ? '+' : '-'), command, operand);
+  } else {
+    mt_gotoXY(2, 65);
+    printf("sc: Error\t");
+  }
+
   mt_gotoXY(2, 65);
-  printf("Dec: %d Oct: %o Hex: %X", accumulator, accumulator, accumulator);
+  printf("hex: %04X", (accumulator & 0x7FFF));
   fflush(stdout);
 }
 
+
 void printCounters(void) {
   mt_gotoXY(5, 65);
-  printf("Dec: %d Oct: %o Hex: %X", instructCounter, instructCounter, instructCounter);
+  // FIX ME: negative numbers, +, -, format %04X ?
+  printf("IC: %04X\t T: %d", instructCounter, instructTact);
   fflush(stdout);
 }
 
@@ -91,27 +113,39 @@ void printCommand()
     int value;
     int sign;
     int command;
-    int opperand;
+    int operand;  // исправлено опечатку в названии переменной (opperand -> operand)
     sc_icounterGet(&value);
-    sc_commandDecode(value, &sign, &command, &opperand);
-    mt_gotoXY(91, 5);
-    if (opperand > 128) {
+    sc_commandDecode(value, &sign, &command, &operand);
+    
+    mt_gotoXY(5, 105);
+    
+    if (operand > 128) {
         printf("! + FF : FF");
         fflush(stdout);
         return;
     }
+    
     char buffer[50];
     snprintf(
-            buffer,
-            sizeof(buffer),
-            "%c %0*X : %0*X",
-            (sign == 0) ? '+' : '-',
-            2,
-            command,
-            2,
-            opperand);
+        buffer,
+        sizeof(buffer),
+        "%c %02X : %02X",
+        (sign == 0) ? '+' : '-',
+        command,
+        operand);
+    
     printf("%s", buffer);
     fflush(stdout);
+}
+
+void printDecodedCommand(int value) {
+  mt_gotoXY(5, 105);
+
+  printf("Hex: %04X Bin: ", value);
+  for (int i = 15; i >= 0; i--) {
+    printf("%d", (value >> i) & 1);
+  }
+  printf("\n");
 }
 
 void printBigCell(void)
@@ -127,14 +161,13 @@ void printBigCell(void)
     int opperand;
     sc_commandDecode(value, &sign, &command, &opperand);
     if (sign == 0) {
-      bc_printbigchar(17, 9, 65, WHITE, BLACK);
+      bc_printbigchar(17, 9, 65, BLUE, BLACK);
     } 
     else {
-      bc_printbigchar(bigchar[16], 9, 65, WHITE, BLACK);
+      bc_printbigchar(16, 9, 65, BLUE, BLACK); 
     }
 
-    int encoded = (command << 8) | opperand;
-
+    // int encoded = (command << 8) | opperand;
     
     int command1, command2;
     int opperand1, opperand2;
@@ -142,13 +175,107 @@ void printBigCell(void)
     command2 = command & 0xF;
     opperand1 = (opperand >> 4) & 0xF;
     opperand2 = opperand & 0xF;
-    bc_printbigchar(command1, 9, 74, WHITE, BLACK);
-    bc_printbigchar(command2, 9, 83, WHITE, BLACK);
-    bc_printbigchar(opperand1, 9, 91, WHITE, BLACK);
-    bc_printbigchar(opperand2, 9, 100, WHITE, BLACK);
+    bc_printbigchar(command1, 9, 76, BLUE, BLACK);
+    bc_printbigchar(command2, 9, 86, BLUE, BLACK);
+    bc_printbigchar(opperand1, 9, 96, BLUE, BLACK);
+    bc_printbigchar(opperand2, 9, 106, BLUE, BLACK);
     mt_gotoXY(18, 68);
     mt_setfgcolor(BLUE);
     mt_setbgcolor(BLACK);
     printf("Номер редактируемой ячейки: %0*u", 4, nowRedact);
     fflush(stdout);
+}
+
+void printCursor(int cursor, enum colors cursor_color) {
+
+  int row = cursor / 10;  // строка от 0 до 9
+  int col = cursor % 10;  // столбец от 0 до 9
+
+  int x = 2 + col * 6;  // сдвиг по X: каждый блок шириной 6
+  int y = 2 + row;      // сдвиг по Y: каждая строка по 1
+
+  mt_gotoXY(y, x);
+  mt_setbgcolor(cursor_color);
+  mt_setfgcolor(WHITE);
+
+  int value;
+  sc_memoryGet(cursor, &value);
+  int sign, command, operand;
+  sc_commandDecode(value, &sign, &command, &operand);
+
+  char buffer[18];
+  if (sign == 0)
+    snprintf(buffer, sizeof(buffer), "+%02X%02X ", command, operand);
+  else
+    snprintf(buffer, sizeof(buffer), "-%02X%02X ", command, operand);
+
+  write(1, buffer, strlen(buffer));
+  fflush(stdout);
+
+  mt_setdefaultcolor();
+
+}
+
+void editCell(int nowCell) {
+
+  int row = nowCell / 10;  // строка от 0 до 9
+  int col = nowCell % 10;  // столбец от 0 до 9
+
+  int x = 2 + col * 6;  // сдвиг по X: каждый блок шириной 6
+  int y = 2 + row;      // сдвиг по Y: каждая строка по 1
+
+  mt_gotoXY(y, x); //x-6?
+
+  int input;
+  int sign, command, operand;
+  if (rk_readvalue(&input, 5) == 0) {
+      sc_memorySet(nowCell, input);
+  } else {
+      sc_memorySet(nowCell, 0);
+  }
+}
+
+void printAllMemory(void) {
+  mt_gotoXY(2, 2);
+  for (int i = 0; i != 13; i++) {
+      mt_gotoXY(2+i, 2);
+      for (int j = 0; j < 10; j++) {
+          printCell(i * 10 + j, WHITE, BLACK);
+      }
+      printf("\n");
+  }
+  printf("\n");
+  mt_setdefaultcolor();
+}
+
+void printblack(int row, int col, char *text) {
+  mt_gotoXY(row, col);
+  mt_setbgcolor(BLACK);
+  for (int i = 0; i< 35; i++)
+    printf(" ");
+  printf("\n");
+  mt_gotoXY(row+1, col);
+  for (int i = 0; i< 35; i++)
+    printf(" ");
+  fflush(stdout);
+
+  mt_gotoXY(row, col);
+  printf("%s", text);
+  // write(1, text, strlen(text));
+  mt_setdefaultcolor();
+  // printf("\n");
+  fflush(stdout);
+}
+
+void printbl(int row, int col) {
+  mt_gotoXY(row, col);
+  mt_setbgcolor(BLACK);
+  for (int i = 0; i< 35; i++)
+    printf(" ");
+  printf("\n");
+  fflush(stdout);
+  mt_gotoXY(row+1, col);
+  for (int i = 0; i< 35; i++)
+    printf(" ");
+  fflush(stdout);
 }

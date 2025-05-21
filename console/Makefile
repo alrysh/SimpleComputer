@@ -1,8 +1,9 @@
 CC = gcc
-CFLAGS = -Wall -I../mySimpleComputer/../include -I../myTerm -I../myBigChars
+CFLAGS = -Wall -I../mySimpleComputer/../include -I../myTerm -I../myBigChars -I../myReadKey
 LDFLAGS = -L../mySimpleComputer -lmySimpleComputer \
           -L../myBigChars -lmyBigChars \
-          -L../myTerm -lmyTerm
+          -L../myTerm -lmyTerm \
+		  -L../myReadKey -lmyReadKey
 
 TARGET = console
 SRC = console.c
@@ -27,9 +28,11 @@ deps:
 	$(MAKE) -C ../myTerm
 	$(MAKE) -C ../mySimpleComputer
 	$(MAKE) -C ../myBigChars
+	$(MAKE) -C ../myReadKey
 
 clean:
 	rm -f $(TARGET) $(FONTGEN) $(FONT_OUT)
 	$(MAKE) -C ../mySimpleComputer clean
 	$(MAKE) -C ../myTerm clean
 	$(MAKE) -C ../myBigChars clean
+	$(MAKE) -C ../myReadKey clean
