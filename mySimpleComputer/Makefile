@@ -5,7 +5,7 @@ ARFLAGS = rcs
 
 LIB_NAME = libmySimpleComputer.a
 
-SRC = command.c memory.c print.c register.c interactive.c signal.c
+SRC = command.c memory.c print.c register.c interactive.c signal.c cache.c
 OBJ = $(SRC:.c=.o)
 
 # font.o добавляем отдельно

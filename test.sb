@@ -1,0 +1,4 @@
+10 INPUT N
+20 PRINT N
+30 LET I = 1
+30 LET F = 1

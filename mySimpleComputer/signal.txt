@@ -53,7 +53,7 @@ void CU(int sig) {
         int command = 0;
         int address = 0;
 
-        if (cache_read(instructCounter, &value) != 1) {
+        if (sc_memoryGet(instructCounter, &value) != 0) {
             sc_regSet(FLAG_MEMORY_OUT, 1);
             return;
         }
@@ -88,10 +88,9 @@ void CU(int sig) {
             //INPUT
             case 0x0A:
                 char input[10];
-                mt_gotoXY(22, 65);
+                // mt_gotoXY(28, 2);
                 mt_setfgcolor(YELLOW);
-                printf("in< ");
-                fflush(stdout);
+                printblack(28, 2, "Введите значение: ");
 
                 rk_mytermregime(1, 0, 0, 1, 1);  // канон реж для fgets
                 fgets(input, sizeof(input), stdin);
@@ -102,35 +101,30 @@ void CU(int sig) {
                 } else if (value < VAL_MIN || value > VAL_MAX) {
                     printblack(29, 2, "Ошибка: значение вне диапазона");
                 } else {
-                    // sc_memorySet(address, value);
-                    cache_write(address, value); //
+                    sc_memorySet(address, value);
+                    // cache_write(address, value);
                 }
-                mt_setdefaultcolor();
+                // printAllMemory();
                 break;
                 
             case 0x0B:
                 
-                // sc_memoryGet(address, &val);
+                sc_memoryGet(address, &val);
                 // if (cache_read(address, &val) == 1) // ! CACHE
                 //     printblack(27, 90, "cache line is hit");
-                cache_read(address, &val);
+                // cache_read(address, &val);
                 printbl(28, 2);
 
-                mt_gotoXY(23,65);
-                mt_setfgcolor(YELLOW);
-                printf("out>\n");
-                mt_gotoXY(24,65);
-                // printf("hex: 0x%X\n dec: %d\n", val);
-                printf("hex: 0x%X dec: %d\n", val, val);
-                mt_setdefaultcolor();
-                fflush(stdout);
+                mt_gotoXY(29,2);
+                printf("Значение (не декодированное) hex: 0x%X, dec: %d\n", val, val);
+                fflush(stdout);   
                 break;
             
             //LOAD
             case 0x14:
                 // Загрузка в аккумулятор значения из указанного адреса
-                // sc_memoryGet(address, &val);
-                cache_read(address, &val);
+                sc_memoryGet(address, &val);
+                // cache_read(address, &val);
                 sc_accumulatorSet(val);
                 break;
 
@@ -138,8 +132,7 @@ void CU(int sig) {
             case 0x15:
                 // Выгружает значение из аккумулятора по указанному адресу
                 sc_accumulatorGet(&val);
-                // sc_memorySet(address, val); //
-                cache_write(address, val);
+                sc_memorySet(address, val);
                 break;
                 
             case 0x1E: // ADD
@@ -147,11 +140,10 @@ void CU(int sig) {
             case 0x20: // DIVIDE
             case 0x21: // MUL
                 int operand = 0;
-                // sc_memoryGet(address, &operand);
-                cache_read(address, &operand);
+                sc_memoryGet(address, &operand);
                 if (ALU(command, operand) == 0) {
                     break;
-
+                    // return;
                 } else if (ALU(command, operand) == -1)
                     printblack(29, 2, "ALU ERROR");
                     // return -1;
@@ -178,7 +170,7 @@ void CU(int sig) {
             case 0x33:
                 // NOT();
                 sc_accumulatorGet(&ac_value);
-                if (cache_write(instructCounter, ~ac_value) == -1) 
+                if (sc_memorySet(instructCounter, ~ac_value) == -1) 
                     sc_regSet(FLAG_OVERFLOW, 1);
                 //почему обнул аккумулятор?
                 break;
@@ -264,7 +256,6 @@ int ALU (int command, int operand) {
     fflush(stdout);
 
     sc_accumulatorSet(result);
-
     return 0;
 }
 
@@ -274,31 +265,8 @@ void signalHandler(int sig) {
     // exit(sig);
 }
 
-void IRC(int signum) {
-
-    if (signum == SIGALRM) {
-        // 1. Проверка флага игнорирования тактовых импульсов
-        int value;
-        sc_regGet(FLAG_CLOCK_IGNORE, &value);
-        if (value) {
-            return; // игнорируем импульс
-        }
-
-        // 2. Проверка счётчика простоя
-        if (instructTact > 0) {
-            instructTact--;
-            printCounters();
-            return;
-        }
-        CU(signum);
-    }
-    else if (signum == SIGUSR1) {
-        CU(signum);
-    }
-}
-
 void signals() {
-    signal(SIGALRM, IRC);   // Таймер → CU
+    signal(SIGALRM, CU);   // Таймер → CU
     // signal(SIGUSR1, CU);   // Reset → CU
 
     // signal(SIGINT, signalHandler);
@@ -311,8 +279,31 @@ void signals() {
 
     // pause();
 
+    // int value;
+    // sc_commandEncode(0, 0x0A, 5, &value); // READ в ячейку 5
+    // sc_memorySet(0, value);
+
     // raise(SIGALRM);
     // CU(SIGALRM);
 }
 
+void IRC(int signum) {
+    if (signum == SIGALRM) {
+        // 1. Проверка флага игнорирования тактовых импульсов
+        int value;
+        sc_regGet(FLAG_CLOCK_IGNORE, &value);
+        if (value) {
+            return; // игнорируем импульс
+        }
 
+        // 2. Проверка счётчика простоя
+        if (instructTact > 0) {
+            instructTact--;
+            return;
+        }
+        CU(signum);
+    }
+    else if (signum == SIGUSR1) {
+        CU(signum);
+    }
+}

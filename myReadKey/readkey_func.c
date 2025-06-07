@@ -24,6 +24,8 @@ int rk_readkey(enum keys *key) {
     else if (buf[0] == 'i') *key = KEY_I;
     else if (buf[0] == 'r') *key = KEY_R;
     else if (buf[0] == 't') *key = KEY_T;
+    else if (buf[0] == 'a') *key = KEY_A;
+    else if (buf[0] == 'b') *key = KEY_B;
     // else if (buf[0] == '+') *key = KEY_PLUS;
     // else if (buf[0] == '-') *key = KEY_MINUS;
     // else if (buf[0] >= '0' && buf[0] <= '9') *key = KEY_0 + (buf[0] - '0');

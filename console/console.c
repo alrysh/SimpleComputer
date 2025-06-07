@@ -2,6 +2,7 @@
 #include "myTerm.h"
 #include "myBigChars.h"
 #include "myReadkey.h"
+#include "mySat.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -48,15 +49,18 @@ int main() {
     sc_accumulatorSet(1);
     sc_icounterSet(5);
     sc_regSet(FLAG_CLOCK_IGNORE, 1);
+    cache_init();
 
     fillMemory();
 
     char* str= "Оперативная память";
     bc_box(1, 1, 13, 62, YELLOW, BLACK, str, YELLOW, BLACK);
 
+    sc_memoryLoad("cache.bin");
     // sc_memoryLoad("command.bin");
-    sc_memoryLoad("fact.bin");
+    // sc_memoryLoad("fact.bin");
     printAllMemory();
+    
 
     bc_box(16, 1, 2, 62, RED, BLACK, "Редактируемая ячейка (формат)", RED, BLACK);
     bc_box(1, 63, 1, 40, RED, BLACK, "Аккумулятор", RED, BLACK);
@@ -73,18 +77,20 @@ int main() {
 
 
     mt_setbgcolor(BLACK);
+    // printCache();
     //БЛОК КОМАНДА:
     printCommand();
     printAccumulator();
     printCounters();
     printFlags();
     
-    mt_gotoXY(20, 65);
-    for (int i = 0; i <= 4; i++) {
-        mt_gotoXY(21+i, 65);
-        mt_setbgcolor(BLACK);
-        printTerm(10+i, 1);
-    }
+    
+    // mt_gotoXY(20, 65);
+    // for (int i = 0; i <= 4; i++) {
+    //     mt_gotoXY(21+i, 65);
+    //     mt_setbgcolor(BLACK);
+    //     printTerm(10+i, 1);
+    // }
 
     mt_gotoXY(21, 85);
     printf("ESC - exit\n");

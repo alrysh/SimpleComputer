@@ -2,6 +2,7 @@
 #include "myTerm.h"
 #include "myBigChars.h"
 #include "myReadkey.h"
+#include "mySat.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -54,9 +55,9 @@ void run_interactive_mode(void) {
                     editCell(nowCell);
                     break;
 
-                case KEY_ESC:
-                    rk_mytermrestore();
-                    return;
+                // case KEY_ESC:
+                //     rk_mytermrestore();
+                //     return;
 
                 case KEY_F5:
                     int a_value;
@@ -113,6 +114,15 @@ void run_interactive_mode(void) {
                     
                     fillMemory();
                     printAllMemory();
+                    break;
+
+                case KEY_A:
+                    // run_assembler_prompt();
+                    assemble("main.sa", "main.o");
+                    break;
+
+                case KEY_B:
+                    parse_basic("test.sb", "test.sa");
                     break;
 
                 case KEY_UP:
@@ -181,6 +191,10 @@ void run_interactive_mode(void) {
                 raise(SIGALRM);
                 // sc_icounterGet (&currentMC);
                 break;
+                
+            case KEY_ESC:
+                    rk_mytermrestore();
+                    return;    
 
             default:
                 break;

@@ -19,6 +19,7 @@ int sc_memorySet(int address, int value) {
     return -1;
   }
   printAllMemory();
+  printCache();
   
   return 0;
 }

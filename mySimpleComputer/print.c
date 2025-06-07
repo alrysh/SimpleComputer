@@ -12,7 +12,6 @@ void printCell(int address, enum colors fg, enum colors bg) {
   mt_setfgcolor(fg);
   mt_setbgcolor(bg);
 
-  //FIX ME: перенести декодирование в sc_memorySet() ?
   int value;
   if (sc_memoryGet(address, &value) == 0) {
     int sign = 0;
@@ -45,16 +44,18 @@ void printFlags(void) {
 void printCellFormat(void) {
   int value;
   sc_memoryGet(nowRedact, &value);
-  mt_gotoXY(18, 3);
+  mt_gotoXY(18, 2);
   mt_setfgcolor(RED);
-  printf("dec: %05d oct: %05o hex: %04x bin: ", value, value, value);
+  mt_setbgcolor(BLACK);
+  printf("dec: %05d oct: %05o hex: %05x bin: ", value, value, value);
+  mt_gotoXY(18, 3);
   for (int i = 15; i >= 0; i--) {
       printf("%d", (value >> i) & 1);
       if (i % 4 == 0 && i != 0) 
           printf(" ");
   }
-  printf("\n");
-  // fflush(stdout);
+  printf(" ");
+  fflush(stdout);
 }
 
 void printAccumulator(void) {
@@ -76,8 +77,14 @@ void printAccumulator(void) {
 
 
 void printCounters(void) {
-  mt_gotoXY(5, 65);
+  
   // FIX ME: negative numbers, +, -, format %04X ?
+
+  mt_gotoXY(5,85);
+  printf("  ");
+  fflush(stdout);
+
+  mt_gotoXY(5, 65);
   printf("IC: %04X\t T: %d", instructCounter, instructTact);
   fflush(stdout);
 }
@@ -113,7 +120,7 @@ void printCommand()
     int value;
     int sign;
     int command;
-    int operand;  // исправлено опечатку в названии переменной (opperand -> operand)
+    int operand;
     sc_icounterGet(&value);
     sc_commandDecode(value, &sign, &command, &operand);
     

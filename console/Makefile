@@ -1,9 +1,11 @@
 CC = gcc
-CFLAGS = -Wall -I../mySimpleComputer/../include -I../myTerm -I../myBigChars -I../myReadKey
+CFLAGS = -Wall -I../mySimpleComputer/../include -I../myTerm -I../myBigChars -I../myReadKey -I../simpleassembler -I../simplebasic
 LDFLAGS = -L../mySimpleComputer -lmySimpleComputer \
           -L../myBigChars -lmyBigChars \
           -L../myTerm -lmyTerm \
-		  -L../myReadKey -lmyReadKey
+		  -L../myReadKey -lmyReadKey \
+		  -L../simpleassembler -lmySat \
+		  -L../simplebasic -lmyBasic
 
 TARGET = console
 SRC = console.c
@@ -29,6 +31,8 @@ deps:
 	$(MAKE) -C ../mySimpleComputer
 	$(MAKE) -C ../myBigChars
 	$(MAKE) -C ../myReadKey
+	$(MAKE) -C ../simpleassembler
+	$(MAKE) -C ../simplebasic
 
 clean:
 	rm -f $(TARGET) $(FONTGEN) $(FONT_OUT)
@@ -36,3 +40,5 @@ clean:
 	$(MAKE) -C ../myTerm clean
 	$(MAKE) -C ../myBigChars clean
 	$(MAKE) -C ../myReadKey clean
+	$(MAKE) -C ../simpleassembler clean
+	$(MAKE) -C ../simplebasic clean
