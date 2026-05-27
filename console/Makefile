@@ -1,0 +1,24 @@
+CC = gcc
+CFLAGS = -Wall -I../mySimpleComputer/../include -I../myTerm
+LDFLAGS = -L../mySimpleComputer -lmySimpleComputer -L../myTerm -lmyTerm
+
+TARGET = console
+SRC = console.c
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	# Сборка программы с использованием двух библиотек
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+# Гарантия, что библиотеки собраны перед компиляцией console
+.PHONY: all clean deps
+
+deps:
+	$(MAKE) -C ../mySimpleComputer
+	$(MAKE) -C ../myTerm
+
+clean:
+	rm -f $(TARGET)
+	$(MAKE) -C ../mySimpleComputer clean
+	$(MAKE) -C ../myTerm clean

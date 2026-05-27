@@ -1,0 +1,32 @@
+BasedOnStyle: Google
+Language: C
+
+IndentWidth: 4
+UseTab: Never
+
+ColumnLimit: 100
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: Inline
+
+SpaceBeforeParens: ControlStatements
+BreakBeforeTernaryOperators: true
+
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignOperands: true
+AlignTrailingComments: true
+
+PointerAlignment: Right
+
+BinPackParameters: false
+AllowAllParametersOfDeclarationOnNextLine: false
+
+SpaceAfterCStyleCast: true
+SpacesInParentheses: false
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceAfterTemplateKeyword: true
+
+IndentCaseLabels: true
+BreakBeforeCaseLabels: true
+
+LambdaBodyIndentation: Signature
