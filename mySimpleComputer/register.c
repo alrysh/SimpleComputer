@@ -11,6 +11,7 @@
 
 int accumulator = 0;
 int instructCounter = 0;
+int instructTact = 0; //!
 int flags = 0;
 
 int sc_regInit(void) {
@@ -28,6 +29,8 @@ int sc_regSet(int reg, int value) {
   else
     flags &= ~reg;
 
+  printFlags();
+
   return 0;
 }
 
@@ -35,15 +38,16 @@ int sc_regSet(int reg, int value) {
 // щает значение указанного флага.
 
 int sc_regGet(int reg, int *value) {
-  if (reg != FLAG_OVERFLOW || reg != FLAG_ZERO_DIV || reg != FLAG_MEMORY_OUT ||
-      reg != FLAG_CLOCK_IGNORE || reg != FLAG_INVALID_CMD || value == NULL) {
-    return -1;
-  }
+    if ((reg != FLAG_OVERFLOW && reg != FLAG_ZERO_DIV &&
+         reg != FLAG_MEMORY_OUT && reg != FLAG_CLOCK_IGNORE &&
+         reg != FLAG_INVALID_CMD) || value == NULL) {
+        return -1;
+    }
 
-  *value = (flags & reg) ? 1 : 0;
-
-  return 0;
+    *value = (flags & reg) ? 1 : 0;
+    return 0;
 }
+
 
 // int sc_accumulatorInit (void) – инициализирует аккуму-
 // лятор значением по умолчанию;
@@ -62,6 +66,8 @@ int sc_accumulatorSet(int value) {
   } else {
     return -1;
   }
+
+  printAccumulator();
   return 0;
 }
 
@@ -86,6 +92,7 @@ int sc_icounterInit(void) {
 int sc_icounterSet(int value) {
   if (value >= VAL_MIN && value <= VAL_MAX) {
     instructCounter = value;
+    void printCommand();
     return 0;
   } else {
     return -1;
@@ -94,7 +101,8 @@ int sc_icounterSet(int value) {
 
 int sc_icounterGet(int *value) {
   if (value != NULL) {
-    *value = instructCounter;
+    // *value = instructCounter;
+    sc_memoryGet(instructCounter, value);
     return 0;
   } else {
     return -1;

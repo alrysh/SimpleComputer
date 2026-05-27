@@ -7,7 +7,7 @@ stages:
 check-format:
   stage: check-format
   script:
-    - find . -type f -name "*.c" -o -type f -name "*.h" | xargs clang-format --style=GNU --verbose
+    - find . -type f -name "*.c" -o -type f -name "*.h" | xargs clang-format --verbose
  
 build:
   stage: build

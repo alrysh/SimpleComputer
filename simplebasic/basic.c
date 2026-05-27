@@ -1,0 +1,346 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdbool.h>
+#include "mySimpleComputer.h"
+#include "mySat.h"
+#include "myBasic.h"
+
+#define MAX_LINE_LENGTH 100
+#define MAX_VARS 26
+
+// int var_table[MAX_VARS];    // Значения переменных A-Z
+// int var_addr[MAX_VARS];     // Соответствующие адреса
+// int var_used[MAX_VARS];     // 0/1, использована ли переменная
+int count_new_vars = 0;
+// char var_name[26];
+
+typedef struct {
+    char name;       // Имя переменной (A-Z)
+    int address;     // Адрес в памяти
+    int used; // Флаг: инициализирована ли переменная (= была ли строчка с "=")
+} Variable;
+
+Variable variables[MAX_VARS];
+
+typedef struct {
+    const char *name;
+    int id;
+} Command;
+
+Command command_basic[] = {
+    {"REM",   0},
+    {"INPUT", 1},
+    {"LET",   2},
+    {"IF",    3},
+    {"PRINT", 4},
+    {"END",   5},
+    {"GOTO",  6},
+    {NULL,   -1}
+};
+
+int get_command_id(const char *name) {
+    for (int i = 0; command_basic[i].name != NULL; i++) {
+        if (strcmp(command_basic[i].name, name) == 0)
+            return command_basic[i].id;
+    }
+    return -1;
+}
+
+// int get_var_address(char var) {
+//     if (!isupper(var)) return -1;
+
+//     int idx = var - 'A';
+//     if (!var_used[idx]) {
+//         var_addr[idx] = count_new_vars;
+//         var_used[idx] = 1;
+//         count_new_vars++;
+//     }
+//     return var_addr[idx];
+// }
+
+int get_var_index(char name) {
+    if (!isupper(name)) return -1;
+
+    for (int i = 0; i < count_new_vars; i++) {
+        if (variables[i].name == name)
+            return i;
+    }
+
+    // Новая
+    if (count_new_vars >= MAX_VARS) return -1; // слишком много переменных
+
+    int idx = count_new_vars++; //должно с нуля
+    variables[idx].name = name;
+    variables[idx].address = idx;
+    variables[idx].used = 0;
+    return idx;
+}
+
+int parse_line_sb(const char *line, char *cmd_out, char *args_out) {
+    while (isspace(*line)) line++;
+    int line_number;
+    char cmd[20], args[80] = {0};
+    
+    // считать без учёта знака равенства
+    if (sscanf(line, "%d %19s %79[^\n]", &line_number, cmd, args) >= 2) {
+        strcpy(cmd_out, cmd);
+        strcpy(args_out, args);
+        return line_number;
+    }
+    mt_gotoXY(28,2);
+    printf("Parsing line: '%s'\n", line);
+    return -1;
+}
+
+//для LET
+int tokenize_let_args(char *line, char **tokens, int max_tokens) {
+    int count = 0;
+    char *token = strtok(line, " \t\n");
+    while (token && count < max_tokens) {
+        tokens[count++] = token;
+        token = strtok(NULL, " \t\n");
+    }
+    return count;
+}
+
+
+// Пишем строку в файл .sa
+void write_sa_line(FILE *out, int mem_index, const char *command, int operand) {
+    if (strcmp(command, "=") == 0)
+        fprintf(out, "%02d %s +%04d\n", mem_index, command, operand);
+    else
+        fprintf(out, "%02d %s %02d\n", mem_index, command, operand);
+}
+
+int build_program(int cmd_id, const char *args, int *mem_index_ptr, FILE *out) {
+    int mem_index = *mem_index_ptr;
+
+    switch (cmd_id) {
+        case 1: { // INPUT A
+            char var;
+            if (sscanf(args, "%c", &var) == 1) {
+                int idx = get_var_index(var);
+                if (idx == -1) return 0;
+
+                if (!variables[idx].used) {
+                    write_sa_line(out, mem_index++, "=", variables[idx].address);
+                    variables[idx].used = 1;
+                }
+
+                write_sa_line(out, mem_index++, "READ", variables[idx].address);
+                *mem_index_ptr = mem_index;
+                return 1;
+            }
+            break;
+        }
+
+        // case 2: { // LET I 
+        //     char var;
+        //     char *argv[100];
+
+        //     if (sscanf(args, "%c", &var) == 1) {
+        //         int idx = get_var_index(var);
+        //         if (idx == -1) return 0;
+
+        //         if (!variables[idx].used) { //если новая И БЕЗ " = "
+        //             write_sa_line(out, mem_index++, "=", 0);
+        //             variables[idx].used = 1;
+        //         }
+
+        case 2: { // LET 
+            char var;
+            if (sscanf(args, "%c", &var) != 1) return 0;
+
+            int idx = get_var_index(var);
+            if (idx == -1) return 0;
+
+            int target_addr = variables[idx].address;
+
+            char *equal_sign = strchr(args, '=');
+            if (!equal_sign) {
+                // Просто LET A — без выражения
+                if (!variables[idx].used) {
+                    write_sa_line(out, mem_index++, "=", target_addr);
+                    variables[idx].used = 1;
+                }
+                *mem_index_ptr = mem_index;
+                return 1;
+            }
+
+            // --- если есть '='
+            char *tokens[10];
+            char args_copy[80];
+            strncpy(args_copy, args, sizeof(args_copy));
+            args_copy[sizeof(args_copy) - 1] = '\0';
+
+            int token_count = tokenize_let_args(args_copy, tokens, 10);
+
+            if (strcmp(tokens[1], "=") != 0) {
+                mt_gotoXY(27,2);
+                printf("tokens[1] = %s", tokens[1]);
+                return 0;
+            } else {
+                mt_gotoXY(27,2);
+                printf("tokens[1] = %s", tokens[1]);
+            }
+
+            const char *left = tokens[0];          // A
+            const char *right1 = tokens[2];        // B или 5
+            const char *right2 = token_count >= 4 ? tokens[3] : NULL; // если есть
+
+            const char *op = (strchr(args, '+')) ? "+" :
+                 (strchr(args, '-')) ? "-" :
+                 (strchr(args, '*')) ? "*" :
+                 (strchr(args, '/')) ? "/" :
+                 NULL;
+
+            // printbl(29,2);
+            // mt_gotoXY(29,2);
+            // printf("left = %s, right1 = %s\n", left, right1);
+            // fflush(stdout);
+
+            int addr1;
+            int is_addr1_num = 0;
+            if (isupper(right1[0]))
+                addr1 = variables[get_var_index(right1[0])].address;
+            else {
+                addr1 = atoi(right1);
+                is_addr1_num = 1;
+            }
+
+            printbl(29,2);
+            mt_gotoXY(29,2);
+            printf("addr1 num: %d is_addr1_num = %d\n", addr1, is_addr1_num);
+            fflush(stdout);
+
+            if (!variables[idx].used) {
+                write_sa_line(out, mem_index++, "=", target_addr);
+                variables[idx].used = 1;
+            }
+
+            if ((op == NULL) && (is_addr1_num == 0)) {
+                write_sa_line(out, mem_index++, "LOAD", addr1); ///
+                write_sa_line(out, mem_index++, "STORE", target_addr); ///
+                
+            } else {
+                int addr2;
+                if (isupper(right2[0]))
+                    addr2 = variables[get_var_index(right2[0])].address;
+                else
+                    addr2 = atoi(right2);
+
+                write_sa_line(out, mem_index++, "LOAD", addr1);
+
+                if (strcmp(op, "+") == 0)
+                    write_sa_line(out, mem_index++, "ADD", addr2);
+                else if (strcmp(op, "-") == 0)
+                    write_sa_line(out, mem_index++, "SUB", addr2);
+                else if (strcmp(op, "*") == 0)
+                    write_sa_line(out, mem_index++, "MUL", addr2);
+                else if (strcmp(op, "/") == 0)
+                    write_sa_line(out, mem_index++, "DIVIDE", addr2);
+
+                write_sa_line(out, mem_index++, "STORE", target_addr);
+            }
+
+            *mem_index_ptr = mem_index;
+            return 1;
+        }
+
+
+        case 4: { // PRINT A
+            char var;
+            if (sscanf(args, "%c", &var) == 1) {
+                int idx = get_var_index(var);
+                if (idx == -1) return 0;
+
+                write_sa_line(out, mem_index++, "WRITE", variables[idx].address);
+                *mem_index_ptr = mem_index;
+                return 1;
+            }
+            break;
+        }
+
+        case 5: { // END
+            write_sa_line(out, mem_index++, "HALT", 0);
+            *mem_index_ptr = mem_index;
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+
+
+int parse_basic(const char *src_path, const char *out_path) {
+    FILE *src = fopen(src_path, "r");
+    if (!src) {
+        mt_gotoXY(28, 2);
+        perror("fopen (input)");
+        return 1;
+    }
+
+    FILE *out = fopen(out_path, "w");
+    if (!out) {
+        mt_gotoXY(28, 2);
+        perror("fopen (output)");
+        fclose(src);
+        return 1;
+    }
+
+    char line[MAX_LINE_LENGTH];
+    char command[20];
+    char args[80];
+    int mem_index = 0;
+
+    while (fgets(line, sizeof(line), src)) {
+        int line_num = parse_line_sb(line, command, args);
+        if (line_num == -1) {
+            fprintf(stderr, "Invalid line: %s\n", line);
+            continue;
+        }
+
+        int cmd_id = get_command_id(command);
+        if (cmd_id == -1) {
+            fprintf(stderr, "Unknown command: %s\n", command);
+            continue;
+        }
+
+        if (!build_program(cmd_id, args, &mem_index, out)) {
+            fprintf(stderr, "Failed to build: %s %s\n", command, args);
+            continue;
+        }
+        // mem_index++;
+        
+    }
+
+    // переменные в начало памяти
+    // for (int i = 0; i < count_new_vars; i++) {
+    //     memory[i] = var_table[i]; // Здесь можно присвоить начальные значения, если надо ??
+    // }
+
+    sc_icounterSet(count_new_vars); // begin
+
+    fclose(src);
+    return 0;
+}
+
+// int parse_text() {
+//     //main.sb -> main.sa -> main.o
+//     char *argv[100];
+//     char program[1000];
+//     char *token_line = strtok(program, "/n");
+
+//     char program_line[100];
+//     char *token = strtok(program_line, " ");
+
+//     int i = 0;
+//     while (token != NULL && i < 100) {
+//         argv[i++] = token;
+//         token = strtok(NULL, " ");
+//     }
+
+// }

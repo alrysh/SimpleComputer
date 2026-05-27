@@ -4,18 +4,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "myTerm.h"
+#include "myBigChars.h"
 
 #define MEMORY_SIZE 128
 
 #define VAL_MIN 0
-#define VAL_MAX 32767
-//и положит и отриц: 2^15 = 32767 и 1 бит для знака
-//только положит: 65535
+#define VAL_MAX 65535
+//положит: 2^15 = 32767 
+//и положит и отриц: 65535 и 1 бит для знака
 //не менять, используется для аккумулятора и счетчика команд
+//поменяла VAL_MIN (был 0)
+
+extern int nowRedact;
 
 extern int memory[MEMORY_SIZE];
 extern int accumulator;
 extern int instructCounter;
+extern int instructTact;
 extern int flags;
 
 #define ACCUMULATOR_MASK 0x7FFF // 32767
@@ -53,10 +58,22 @@ int sc_commandDecode(int value, int *sign, int *command, int *operand);
 
 //ввод-вывод
 void printCell(int address, enum colors fg, enum colors bg);
+void printCellFormat(void);
 void printAccumulator(void);
 void printFlags(void);
 void printCounters(void);
 void printDecodedCommand(int value);
 void printTerm(int address, int input);
+
+void printCommand();
+void printBigCell(void);
+
+void printCursor(int cursor, enum colors cursor_color);
+void editCell(int nowCell);
+void printAllMemory(void);
+
+void prompt_filename(char *filename, size_t size);
+void run_interactive_mode(void);
+void printblack(int row, int col, char *text);
 
 #endif

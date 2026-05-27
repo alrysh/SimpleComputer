@@ -1,15 +1,25 @@
 #include "mySimpleComputer.h"
 #include "myTerm.h"
+#include "myBigChars.h"
+#include "myReadkey.h"
+#include "mySat.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <sys/time.h>
 
+
+//перенести в memory.c
 void fillMemory()
 {
     for (int i = 0; i < MEMORY_SIZE; i++) {
-        sc_memorySet(i, i+50);
+        // sc_memorySet(i, i+1);
+        sc_memorySet(i, 0);
     }
+
+    // sc_memorySet(1, 128); //0x0100 - 128
 }
 
 int main() {
@@ -35,56 +45,67 @@ int main() {
     sc_memoryInit();
     sc_regInit();
     sc_accumulatorInit();
-    sc_icounterInit(); ///
-    sc_regSet(FLAG_OVERFLOW, 1);
-    sc_regSet(FLAG_MEMORY_OUT, 1);
-    sc_accumulatorSet(4691);
-    sc_icounterSet(25384); ///
-    // mt_clrscr();
+    sc_icounterInit(); 
+    sc_accumulatorSet(1);
+    sc_icounterSet(5);
+    sc_regSet(FLAG_CLOCK_IGNORE, 1);
+    cache_init();
 
     fillMemory();
 
-    // for (int i = 0; i != 128; i++) {
-    //     printCell(i, WHITE, BLACK);
-    // }
+    char* str= "Оперативная память";
+    bc_box(1, 1, 13, 62, YELLOW, BLACK, str, YELLOW, BLACK);
 
-    for (int i = 0; i != 12; i++) {
-        for (int j = 0; j < 10; j++) {
-            printCell(i * 10 + j, WHITE, BLACK);
-        }
-        printf("\n");
-    }
-    printf("\n");
+    sc_memoryLoad("cache.bin");
+    // sc_memoryLoad("command.bin");
+    // sc_memoryLoad("fact.bin");
+    printAllMemory();
+    
+
+    bc_box(16, 1, 2, 62, RED, BLACK, "Редактируемая ячейка (формат)", RED, BLACK);
+    bc_box(1, 63, 1, 40, RED, BLACK, "Аккумулятор", RED, BLACK);
+    bc_box(1, 103, 1, 40,  RED, BLACK, "Регистр флагов", RED, BLACK);
+    bc_box(4, 63, 1, 40, RED, BLACK, "Счетчик команд", RED, BLACK);
+    bc_box(4, 103, 1, 40, RED, BLACK, "Команда", RED, BLACK);
+
+    bc_box(7, 63, 11, 80, BLUE, BLACK, "Редактируемая команда (увеличено)", BLUE, BLACK);
+
+    bc_box(20, 1, 5, 62, WHITE, BLACK, "Кэш процессора", BLACK, WHITE);
+    bc_box(20, 63, 5, 20, WHITE, BLACK, "IN-OUT", BLACK, WHITE);
+    bc_box(20, 83, 5, 60, GREEN, BLACK, "Клавиши", GREEN, BLACK);
     mt_setdefaultcolor();
 
-    int value;
-    sc_memoryGet(0, &value);
-    printDecodedCommand(accumulator);
 
+    mt_setbgcolor(BLACK);
+    // printCache();
+    //БЛОК КОМАНДА:
+    printCommand();
     printAccumulator();
     printCounters();
     printFlags();
+    
+    
+    // mt_gotoXY(20, 65);
+    // for (int i = 0; i <= 4; i++) {
+    //     mt_gotoXY(21+i, 65);
+    //     mt_setbgcolor(BLACK);
+    //     printTerm(10+i, 1);
+    // }
 
-    mt_gotoXY(90,1);
+    mt_gotoXY(21, 85);
+    printf("ESC - exit\n");
+    mt_gotoXY(22, 85);
+    printf("F5 - accumulator\n");
+    mt_gotoXY(23, 85);
+    printf("F6 - instruction counter\n");
+    mt_gotoXY(24, 85);
+    printf("l - load, s - save, i - reset");
+    fflush(stdout);
 
-    for (int i = 0; i < 7; i++) {
-        printCell(i, WHITE, BLACK);
-    }
-    printf("\n");
+    run_interactive_mode();
 
-    // mt_setcolor(BLUE, WHITE);
-    // write(1, "Colored Text", 12);
-    // mt_setdefaultcolor();
-    // printf("\n");
-
-    // mt_setfgcolor(PURPLE);
-    // printf("Colored text\n");
-    // mt_setbgcolor(RED);
-
-    // write(1, "Colored Text", 12); //!
-    // mt_setdefaultcolor();
-    // printf("\n");
-    // printf("Colored text\n");
+    mt_gotoXY(90, 1);
 
     return 0;
+    // return EXIT_SUCCESS;
 }
